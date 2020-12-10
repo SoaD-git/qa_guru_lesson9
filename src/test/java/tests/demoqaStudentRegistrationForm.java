@@ -1,9 +1,14 @@
 package tests;
 
 import com.codeborne.selenide.logevents.SelenideLogger;
+import com.github.javafaker.Faker;
+import com.github.javafaker.service.FakeValuesService;
+import com.github.javafaker.service.RandomService;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Locale;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
@@ -17,11 +22,16 @@ public class demoqaStudentRegistrationForm {
         SelenideLogger.addListener("allure", new AllureSelenide());
     }
 
-    String url = "https://demoqa.com/automation-practice-form",
-            firstName = "dmitriy",
-            lastName = "lupachev",
-            email = "user@stable.ru",
-            mobile = "0123456789",
+    Faker faker = new Faker();
+    FakeValuesService fakeValuesService = new FakeValuesService(
+            new Locale("en-GB"), new RandomService());
+    String firstName = faker.name().firstName();
+    String lastName = faker.name().lastName();
+    String userEmail = fakeValuesService.bothify("????##@gmail.com");
+    String userNumber = fakeValuesService.regexify("[0-9]{10}");
+    String currentAddress = faker.address().fullAddress();
+
+    String  url = "https://demoqa.com/automation-practice-form",
             dayBirth = "09",
             monthBirth = "April",
             yearBirth = "1987",
@@ -32,7 +42,6 @@ public class demoqaStudentRegistrationForm {
             hobby1 = "Reading",
             hobby2 = "Sports",
             picture = "3.jpg",
-            currentAddress = "New address, 1",
             state = "Haryana",
             city = "Panipat";
 
@@ -45,12 +54,12 @@ public class demoqaStudentRegistrationForm {
         step("Вводим значение " + lastName + " в поле Last Name", () -> {
             $("#lastName").val(lastName);
         });
-        step("Вводим значение " + email + " в поле Email", () -> {
-            $("#userEmail").val(email);
+        step("Вводим значение " + userEmail + " в поле Email", () -> {
+            $("#userEmail").val(userEmail);
         });
         step("Выбираем пол (Gender)", () -> $("#genterWrapper").$(byText("Male")).click());
-        step("Вводим значение " + mobile + " в поле Mobile", () -> {
-            $("#userNumber").scrollTo().val(mobile);
+        step("Вводим значение " + userNumber + " в поле Mobile", () -> {
+            $("#userNumber").scrollTo().val(userNumber);
         });
         step("Выбираем дату рождения " + dayBirth + " " + monthBirth + " " + yearBirth, () -> {
             $("#dateOfBirthInput").click();
@@ -87,9 +96,9 @@ public class demoqaStudentRegistrationForm {
             $("#example-modal-sizes-title-lg").shouldHave(text("Thanks for submitting the form"));
         });
         step("Проверяем корректность заполненных данных", () -> {
-            $(".table-responsive").shouldHave(text(firstName + " " + lastName), text(email), text("Male"));
+            $(".table-responsive").shouldHave(text(firstName + " " + lastName), text(userEmail), text("Male"));
 
-            $x("//td[text()='Mobile']").parent().shouldHave(text(mobile));
+            $x("//td[text()='Mobile']").parent().shouldHave(text(userNumber));
 
             $x("//td[text()='Date of Birth']").parent().shouldHave(text(dayBirth + " " + monthBirth + "," + yearBirth));
 
