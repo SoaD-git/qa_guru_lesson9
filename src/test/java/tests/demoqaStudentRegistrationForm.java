@@ -1,11 +1,14 @@
 package tests;
 
-import com.codeborne.selenide.logevents.SelenideLogger;
+import com.codeborne.selenide.Configuration;
 import com.github.javafaker.Faker;
 import com.github.javafaker.service.FakeValuesService;
 import com.github.javafaker.service.RandomService;
+import io.qameta.allure.Step;
 import io.qameta.allure.selenide.AllureSelenide;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -13,13 +16,26 @@ import java.util.Locale;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.logevents.SelenideLogger.addListener;
+import static helpers.AttachmentsHelper.*;
 import static io.qameta.allure.Allure.step;
 
 public class demoqaStudentRegistrationForm {
 
     @BeforeEach
-    public void initSelenideListener() {
-        SelenideLogger.addListener("allure", new AllureSelenide());
+        public void setup() {
+        addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));
+        Configuration.startMaximized = true;
+    }
+
+    @AfterEach
+    @Step
+    public void afterEach() {
+        attachScreenshot("Last Screenshot");
+        attachPageSource();
+        attachAsText("Browser console logs", getConsoleLogs());
+
+        closeWebDriver();
     }
 
     Faker faker = new Faker();
@@ -46,6 +62,7 @@ public class demoqaStudentRegistrationForm {
             city = "Panipat";
 
     @Test
+    @DisplayName("Successful fill registration form")
     void positiveStudentRegistrationFormTest() {
         step("Открываем страницу " + url, () -> open(url));
         step("Вводим значение " + firstName + " в поле First Name", () -> {
